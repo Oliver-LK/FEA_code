@@ -1,5 +1,6 @@
+# Example code for Bars
+
 import numpy as np
-import matplotlib.pyplot as plt
 from useful_funcs import *
 from Bars import *
 

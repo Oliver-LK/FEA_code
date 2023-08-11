@@ -7,7 +7,7 @@
 #                  loads to be placed at point of freedom in
 #                  structure
 #  
-#  ***********************************************************
+#***********************************************************
 
 # Library imports
 import numpy as np

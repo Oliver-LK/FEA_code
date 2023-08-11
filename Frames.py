@@ -7,7 +7,7 @@
 #                  loads to be placed at point of freedom in
 #                  structure
 #  
-#  ***********************************************************
+# ***********************************************************
 
 
 # Library imports
@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 from useful_funcs import remove
 
 N_POINTS = 25       # Num of points in each element
-PLOT_MAGNIFY = 100  # Magnification factor to actually see the displacements
+PLOT_MAGNIFY = 30  # Magnification factor to actually see the displacements
 
 
 class Frame:
@@ -62,9 +62,8 @@ class Frame:
         return matrix * (self.second_MoA * self.E / (self.length ** 3))
     
 
-    def give_global_stiffness(self):
-        """ Gives the global stiffness of the element"""
-        
+    def give_transform_matrix(self):
+        """ Gives the horrid transform matrix"""
         angle = np.deg2rad(self.angle)
 
         # Building the matrix
@@ -74,7 +73,14 @@ class Frame:
                                   [0, 0, 1]])
         
         up_lambda = np.concatenate((np.concatenate((non_zero_part, zero_matrix), axis=1),np.concatenate((zero_matrix, non_zero_part), axis=1)), axis=0)
+
+        return up_lambda
         
+
+    def give_global_stiffness(self):
+        """ Gives the global stiffness of the element"""
+        
+        up_lambda = Frame.give_transform_matrix(self)
         # Maths part
         local_stiffness = Frame.give_local_stiffness(self)
 
@@ -112,20 +118,30 @@ class Frame:
 
     def give_nodal_displacements_element_coord(self, global_deflections: np.ndarray):
         """ Gives the displacements of each node in element coordinates"""
-        angle = np.deg2rad(self.angle)
-
-        # Building the matrix
-        zero_matrix = np.zeros((3, 3))
-        non_zero_part = np.array([[np.cos(angle), np.sin(angle), 0],
-                                 [-1 * np.sin(angle), np.cos(angle), 0],
-                                 [0, 0, 1]])
         
-        up_lambda = np.concatenate((np.concatenate((non_zero_part, zero_matrix), axis=1),np.concatenate((zero_matrix, non_zero_part), axis=1)), axis=0)
-        
+        up_lambda = Frame.give_transform_matrix(self)
         
         displacements = up_lambda @ self.assembly_matrix.T @ global_deflections
         self.element_nodal_deflections = displacements
 
+
+
+def give_overall_stiffness_matrix(element_list: list[Frame], num_elements):
+    """ Returns the total global stiffness matrix of all elements"""
+
+    total_global_stiffness = np.zeros((num_elements + 1, num_elements + 1))
+
+    for element in element_list:
+        total_global_stiffness += element.give_global_contribution_stiffness()
+
+    return total_global_stiffness
+
+
+def give_global_deflections(overall_global_stiffness: np.ndarray, force: np.ndarray):
+    """ Finds the global deflections"""        
+
+    deflections = np.linalg.inv(overall_global_stiffness) @ force
+    return deflections
     
 
 
@@ -217,25 +233,6 @@ class Plot_frame(Frame):
         self.xg_deflection = xg_deflection
         self.yg_deflection = yg_deflection
 
-
-    
-def give_overall_stiffness_matrix(element_list: list[Frame]):
-    """ Returns the total global stiffness matrix of all elements"""
-
-    total_global_stiffness = np.zeros((3, 3))
-
-    for element in element_list:
-        total_global_stiffness += element.give_global_contribution_stiffness()
-
-    return total_global_stiffness
-
-
-def give_global_deflections(overall_global_stiffness: np.ndarray, force: np.ndarray):
-    """ Finds the global deflections
-    """        
-
-    deflections = np.linalg.inv(overall_global_stiffness) @ force
-    return deflections
 
 
 def copy_class_details(class_copy: Frame):

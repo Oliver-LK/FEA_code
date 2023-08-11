@@ -1,13 +1,27 @@
+#***********************************************************
+#  AUTHOR        : Oliver Clements
+#  CREATE DATE   : 11/8/2023
+#  PURPOSE       : ENME302 FEA code that contains useful
+#                  functions that are free to be called
+#                  from other modules
+#  
+#***********************************************************
+
+
 import numpy as np
 
 MAGNITUDE_FACTOR = 1 * 10 ** 6
+CUT_OFF = 1 * 10 ** -15
 
-def give_area_of_circle(diameter):
+def give_area_of_circle(diameter: float):
+    """ Gives the area of a circle"""
     return (np.pi * diameter ** 2) / 4
 
-def give_mm_to_m(measurement):
+
+def give_mm_to_m(measurement: float):
     """ Converts mm to m"""
     return measurement / 1000
+
 
 def remove(matrix: np.ndarray):
     """ Determines if array is 1d or 2d and calls the appropriate method"""
@@ -21,6 +35,7 @@ def remove(matrix: np.ndarray):
 
     return matrix
 
+
 def remove_insignificant_values_1d(matrix: np.ndarray):
     """ Removes values if from a 2D array if they are insignificant"""
     row_index = 0
@@ -29,12 +44,13 @@ def remove_insignificant_values_1d(matrix: np.ndarray):
 
     while row_index < len(matrix):
 
-        if(abs(matrix[row_index]) < (largest_value / MAGNITUDE_FACTOR)):
+        if(abs(matrix[row_index]) < (largest_value / MAGNITUDE_FACTOR) or (abs(matrix[row_index] < CUT_OFF))):
             matrix[row_index] = 0
 
         row_index += 1
     
     return matrix
+
 
 def remove_insignificant_values_2d(matrix: np.ndarray):
     """ Removes values if from a 2D array if they are insignificant"""
@@ -46,7 +62,7 @@ def remove_insignificant_values_2d(matrix: np.ndarray):
     while col_index < len(matrix):
         while row_index < len(matrix[0]):
 
-            if((abs(matrix[col_index][row_index]) < (largest_value / MAGNITUDE_FACTOR) or (abs(matrix[col_index][row_index] < 1 * 10 ** -15)))):
+            if((abs(matrix[col_index][row_index]) < (largest_value / MAGNITUDE_FACTOR) or (abs(matrix[col_index][row_index] < CUT_OFF)))):
                 matrix[col_index][row_index] = 0
 
             row_index += 1

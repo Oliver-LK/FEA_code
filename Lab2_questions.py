@@ -1,5 +1,6 @@
+# Example code for Frames
+
 import numpy as np
-import matplotlib.pyplot as plt
 from useful_funcs import *
 from Frames import *
 
@@ -24,14 +25,13 @@ global_stiffness1 = frame2.give_global_contribution_stiffness()
 
 
 # Necessary lines
-overall_global_stiffness = give_overall_stiffness_matrix(frame_list)
+overall_global_stiffness = give_overall_stiffness_matrix(frame_list, 2)
 
 # External forcing term
 Q = np.array([0, 140000, 0])
 Q = Q.T         # Transpose so its a vector
 
 overall_deflections = give_global_deflections(overall_global_stiffness, Q)
-# print(overall_deflections)
 
 # Element 1
 frame1.give_nodal_displacements_global_coord(overall_deflections)
@@ -49,9 +49,7 @@ print(remove(frame1.element_nodal_deflections))
 print(remove(frame2.element_nodal_deflections))
 
 
-
 # Plotting stuff
-# Need
 # Copying class details for new child class
 frame_plot_list = []
 
@@ -77,37 +75,3 @@ for frame in frame_plot_list:
 
 # Plot
 plot_deflection(frame_plot_list)
-
-# frame1_plot.find_shape_functions()
-# frame2_plot.find_shape_functions()
-# # print(frame1_plot.transverse_shape)
-
-# # print(remove_insignificant_values(element_nodal_deflections1))
-# element_nodal_deflections1 = frame1.give_nodal_displacements_element_coord(overall_deflections)
-# element_nodal_deflections2 = frame2.give_nodal_displacements_element_coord(overall_deflections)
-
-
-# # Need this code
-# frame1_plot.find_baselines()
-# frame2_plot.find_baselines()
-
-# frame1_plot.find_axial_displacements(np.array([element_nodal_deflections1[0]]), np.array([element_nodal_deflections1[3]]))
-# frame2_plot.find_axial_displacements(np.array([element_nodal_deflections2[0]]), np.array([element_nodal_deflections2[3]]))
-
-# frame1_plot.find_transverse_displacements(np.array([element_nodal_deflections1[1], element_nodal_deflections1[2], element_nodal_deflections1[4], element_nodal_deflections1[5]]))
-# frame2_plot.find_transverse_displacements(np.array([element_nodal_deflections2[1], element_nodal_deflections2[2], element_nodal_deflections2[4], element_nodal_deflections2[5]]))
-
-# frame1_plot.find_deflections_XG_YG()
-# frame2_plot.find_deflections_XG_YG()
-
-
-
-# print(frame1_plot.element_axial_d)
-# print(frame2_plot.element_axial_d)
-
-
-# print(frame1_plot.element_transverse_d)
-# print(frame2_plot.element_transverse_d)
-
-# print(len(frame1_plot.xg_baseline))
-# print(len(frame1_plot.xg_deflection))
