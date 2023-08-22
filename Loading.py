@@ -18,6 +18,7 @@ def UDL_nodal_equivalent(frame: Frame, load: float):
     """ Gives the equivalent nodal load for a UDL"""
 
     nodal_equivalent = np.array([0, load * frame.length / 2, (load * frame.length ** 2 / 12), 0, load * frame.length / 2, (-load * frame.length ** 2 / 12)])
+    # print(nodal_equivalent.T)
     return nodal_equivalent.T
 
 
@@ -35,6 +36,20 @@ def MSL_nodal_equivalent(frame: Frame, load: float):
     return nodal_equivalent.T
 
 
+def general_MSL_nodal_equivalent(frame: Frame, load: float, x: float):
+    """ GIves the equivalent nodal forces for a load some distance along it"""
+
+    nodal_equivalent = np.array([0, 
+                                load * (1 - 3 * ((x ** 2) / (frame.length ** 2)) + 2 * ((x ** 3) / (frame.length ** 3))),
+                                load * (x ** 3 / (frame.length ** 2) -  2 * (x ** 2 / frame.length) + x), 
+                                0, 
+                                load * (3 * ((x ** 2) / (frame.length ** 2)) - 2 * ((x ** 3) / (frame.length ** 3))), 
+                                load * (x ** 3 / (frame.length ** 2) -  (x ** 2 / frame.length))])
+    
+    return nodal_equivalent.T
+
+
+
 # Axial loading
 def DAL_nodal_equivalent(frame: Frame, load: float):
     """ Gives the equivalent nodal load for a uniform distributed axial load"""
@@ -46,7 +61,7 @@ def DAL_nodal_equivalent(frame: Frame, load: float):
 def CAL_nodal_equivalent(frame: Frame, load: float, distance: float):
     """ Gives the equivalent nodal load an axial load somewhere along the frame element"""
 
-    nodal_equivalent = load * np.array([1 - (distance / frame.length), 0, 0, distance / frame.length])
+    nodal_equivalent = load * np.array([1 - (distance / frame.length), 0, 0, distance / frame.length, 0, 0])
     return nodal_equivalent
 
 # Transforms
@@ -54,7 +69,7 @@ def load_to_global(frame: Frame, element_force: np.ndarray):
     """ Converts the load into global coordinates"""
 
     up_lambda = frame.give_transform_matrix()
-    global_force = (up_lambda ** 2).T @ element_force
+    global_force = up_lambda.T @ element_force
 
     return global_force
 
@@ -62,7 +77,7 @@ def load_to_global(frame: Frame, element_force: np.ndarray):
 def give_equivalent_force(frame: Frame, global_force: np.ndarray):
     """ Gives the equivalent nodal force from a distributed load in global coords"""
 
-    global_coord_force = (frame.assembly_matrix ** 2) @ global_force
+    global_coord_force = frame.assembly_matrix @ global_force
     return global_coord_force
 
 

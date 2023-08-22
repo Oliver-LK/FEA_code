@@ -33,7 +33,7 @@ def remove(matrix: np.ndarray):
     elif len(matrix_shape) == 1:
         matrix = remove_insignificant_values_1d(matrix)
 
-    return matrix
+    return np.round(matrix, decimals=0)
 
 
 def remove_insignificant_values_1d(matrix: np.ndarray):
@@ -44,7 +44,7 @@ def remove_insignificant_values_1d(matrix: np.ndarray):
 
     while row_index < len(matrix):
 
-        if(abs(matrix[row_index]) < (largest_value / MAGNITUDE_FACTOR) or (abs(matrix[row_index] < CUT_OFF))):
+        if(abs(matrix[row_index]) < (abs(largest_value) / MAGNITUDE_FACTOR) or (abs(matrix[row_index]) < CUT_OFF)):
             matrix[row_index] = 0
 
         row_index += 1
@@ -57,12 +57,12 @@ def remove_insignificant_values_2d(matrix: np.ndarray):
     row_index = 0
     col_index = 0
     
-    largest_value = np.max(matrix)
+    largest_value = abs(np.max(matrix))
 
     while col_index < len(matrix):
         while row_index < len(matrix[0]):
 
-            if((abs(matrix[col_index][row_index]) < (largest_value / MAGNITUDE_FACTOR) or (abs(matrix[col_index][row_index] < CUT_OFF)))):
+            if((abs(matrix[col_index][row_index]) < (largest_value / MAGNITUDE_FACTOR) or (abs(matrix[col_index][row_index]) < CUT_OFF))):
                 matrix[col_index][row_index] = 0
 
             row_index += 1

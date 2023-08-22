@@ -15,8 +15,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from useful_funcs import remove
 
-N_POINTS = 25       # Num of points in each element
-PLOT_MAGNIFY = 30  # Magnification factor to actually see the displacements
+N_POINTS = 400      # Num of points in each element
+PLOT_MAGNIFY = 5  # Magnification factor to actually see the displacements
 
 
 class Frame:
@@ -41,6 +41,7 @@ class Frame:
         self.assembly_matrix = assembly_matrix
         self.element_nodal_deflections = element_nodal_deflections
         self.global_nodal_deflections = global_nodal_deflections
+        self.element_nodal_forces = None
 
         self.beta = (area * length ** 2) / second_MoA
 
@@ -81,12 +82,12 @@ class Frame:
         """ Gives the global stiffness of the element"""
         
         up_lambda = Frame.give_transform_matrix(self)
-        # Maths part
+
         local_stiffness = Frame.give_local_stiffness(self)
 
         global_stiffness = up_lambda.T @ local_stiffness @ up_lambda
 
-        return (global_stiffness) # Could be a source of error
+        return (global_stiffness)
     
 
     def give_global_contribution_stiffness(self):
@@ -100,7 +101,10 @@ class Frame:
         """ Gives the nodal forces in element coordinates"""
         local_stiffness = Frame.give_local_stiffness(self)
 
-        return local_stiffness @ element_deflections
+        element_nodal_forces = local_stiffness @ element_deflections
+        self.element_nodal_forces = element_nodal_forces
+
+        return element_nodal_forces
 
 
     def give_global_nodal_forces(self, global_deflections: np.ndarray):
@@ -124,12 +128,23 @@ class Frame:
         displacements = up_lambda @ self.assembly_matrix.T @ global_deflections
         self.element_nodal_deflections = displacements
 
+    
+    def give_axial_stress(self, axial_force: np.ndarray):
+        """Gives the axial stress within an element"""
+        return axial_force / self.area
+    
+
+    def give_strain(self):
+        """ Gives the strain within an element"""
+        return (self.element_nodal_deflections[3] - self.element_nodal_deflections[0]) / self.length
+    
+    
 
 
 def give_overall_stiffness_matrix(element_list: list[Frame], num_elements):
     """ Returns the total global stiffness matrix of all elements"""
 
-    total_global_stiffness = np.zeros((num_elements + 1, num_elements + 1))
+    total_global_stiffness = np.zeros((num_elements, num_elements))
 
     for element in element_list:
         total_global_stiffness += element.give_global_contribution_stiffness()
